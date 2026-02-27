@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useSocket } from '../hooks/useSocket';
 import { usePollContext } from '../context/PollContext';
 import { usePollTimer } from '../hooks/usePollTimer';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard = () => {
   const socket = useSocket();
   const { poll, sessionId, setSessionId, studentName, setStudentName, kickedOut, error, role, setRole } = usePollContext();
   const timeLeft = usePollTimer();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   
   const [nameInput, setNameInput] = useState('');
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
