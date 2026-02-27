@@ -8,27 +8,32 @@ export const handleSockets = (io: Server) => {
 
         // Join room setup
         socket.on('join', async (data: { role: 'teacher' | 'student', name?: string, sessionId?: string }) => {
-            if (data.role === 'student' && data.sessionId && data.name) {
-                const allowed = await StudentService.registerStudent(data.sessionId, data.name);
-                if (!allowed) {
-                    socket.emit('student_kicked', { sessionId: data.sessionId });
-                    return;
+            try {
+                if (data.role === 'student' && data.sessionId && data.name) {
+                    const allowed = await StudentService.registerStudent(data.sessionId, data.name);
+                    if (!allowed) {
+                        socket.emit('student_kicked', { sessionId: data.sessionId });
+                        return;
+                    }
+
+                    await StudentService.updateSocketId(data.sessionId, socket.id);
+                    socket.join('students');
+
+                    // Notify teacher
+                    const students = await StudentService.getActiveStudents();
+                    io.to('teacher').emit('students_updated', students);
+                } else if (data.role === 'teacher') {
+                    socket.join('teacher');
                 }
 
-                await StudentService.updateSocketId(data.sessionId, socket.id);
-                socket.join('students');
-
-                // Notify teacher
-                const students = await StudentService.getActiveStudents();
-                io.to('teacher').emit('students_updated', students);
-            } else if (data.role === 'teacher') {
-                socket.join('teacher');
-            }
-
-            // Send active poll state to the newly joined user
-            const activePoll = await PollService.getActivePoll();
-            if (activePoll) {
-                socket.emit('poll_active', activePoll);
+                // Send active poll state to the newly joined user
+                const activePoll = await PollService.getActivePoll();
+                if (activePoll) {
+                    socket.emit('poll_active', activePoll);
+                }
+            } catch (err: any) {
+                console.error('Join error:', err.message);
+                socket.emit('error', { message: 'Failed to join session: Database unreachable' });
             }
         });
 
@@ -72,10 +77,14 @@ export const handleSockets = (io: Server) => {
 
         socket.on('disconnect', async () => {
             console.log(`Socket disconnected: ${socket.id}`);
-            // Set student as inactive instead of removing them, for state resilience
-            await StudentService.setInactiveBySocketId(socket.id);
-            const students = await StudentService.getActiveStudents();
-            io.to('teacher').emit('students_updated', students);
+            try {
+                // Set student as inactive instead of removing them, for state resilience
+                await StudentService.setInactiveBySocketId(socket.id);
+                const students = await StudentService.getActiveStudents();
+                io.to('teacher').emit('students_updated', students);
+            } catch (err: any) {
+                console.error('Disconnect error:', err.message);
+            }
         });
     });
 };
