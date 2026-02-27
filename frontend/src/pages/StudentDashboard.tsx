@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard = () => {
   const socket = useSocket();
-  const { poll, sessionId, setSessionId, studentName, setStudentName, kickedOut, error } = usePollContext();
+  const { poll, sessionId, setSessionId, studentName, setStudentName, kickedOut, error, role, setRole } = usePollContext();
   const timeLeft = usePollTimer();
   const navigate = useNavigate();
   
@@ -16,6 +16,9 @@ const StudentDashboard = () => {
 
   // Initialize session
   useEffect(() => {
+    if (role !== 'student') {
+      setRole('student');
+    }
     if (!sessionId) {
       const existingSession = sessionStorage.getItem('studentSessionId');
       if (existingSession) {

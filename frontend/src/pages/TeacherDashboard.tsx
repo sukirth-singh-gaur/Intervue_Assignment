@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSocket } from '../hooks/useSocket';
 import { usePollContext } from '../context/PollContext';
 import { usePollTimer } from '../hooks/usePollTimer';
 
 const TeacherDashboard = () => {
   const socket = useSocket();
-  const { poll, students, error } = usePollContext();
+  const { poll, students, error, role, setRole } = usePollContext();
   const timeLeft = usePollTimer();
   
+    // Restore role on reload
+  useEffect(() => {
+    if (role !== 'teacher') {
+      setRole('teacher');
+    }
+  }, [role, setRole]);
+
   const [question, setQuestion] = useState('');
   const [duration, setDuration] = useState(60);
   const [options, setOptions] = useState([
@@ -66,6 +73,18 @@ const TeacherDashboard = () => {
   if (poll && poll.status === 'active' && !showHistory) {
     return (
       <div className="min-h-screen bg-[#F2F2F2] p-8">
+        <div className="max-w-5xl mx-auto mb-6 flex justify-between items-center">
+          <div className="bg-[#7755DA] text-white px-3 py-1 rounded-full text-xs font-semibold inline-block">
+            Intervue Poll
+          </div>
+          <button 
+            onClick={fetchHistory}
+            className="text-sm font-semibold text-white bg-[#7755DA] py-1.5 px-4 rounded-full hover:bg-[#5757D0] transition-colors"
+          >
+            ◉ View Poll History
+          </button>
+        </div>
+        
         {/* Active Poll View */}
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
           
