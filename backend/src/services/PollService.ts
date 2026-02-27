@@ -67,7 +67,7 @@ export class PollService {
     }
 
     static async closePoll(pollId: string): Promise<IPoll | null> {
-        return Poll.findByIdAndUpdate(pollId, { status: 'closed' }, { new: true });
+        return Poll.findByIdAndUpdate(pollId, { status: 'closed' }, { returnDocument: 'after'});
     }
 
 }
