@@ -1,6 +1,10 @@
 # Intervue_Assignment
 
 A full-stack, real-time live polling application designed with state resilience to survive page refreshes, late-joining students, and network disconnections. 
+### ⚠️ Important Note for Reviewers (Deployment)
+The backend of this application is deployed on a **free instance of Render**. 
+If the server has been inactive for 15 minutes, Render will spin down the instance.\
+**Please allow up to 50-60 seconds for the initial request to complete and reload webpage** as the server wakes up. Once awake, all real-time socket connections and API requests will execute instantly.
 
 ## Project Architecture
 
