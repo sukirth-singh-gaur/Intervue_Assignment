@@ -1,23 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import toast from 'react-hot-toast';
 import { usePollContext, type Poll, type Student } from '../context/PollContext';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5010';
 
 export const useSocket = () => {
     const socketRef = useRef<Socket | null>(null);
-    //If you put the socket instance in useState, every time the connection status changes,
-    //  React would force your entire application to re-render. useRef acts as a mutable "box" 
-    // that holds the socket connection quietly in the background without triggering unnecessary UI updates.
-    
     const { setPoll, setStudents, setError, role, studentName, sessionId, setKickedOut } = usePollContext();
 
     useEffect(() => {
         // Determine if we should connect
         if (!role) return;
         if (role === 'student' && (!studentName || !sessionId)) return;
-        //These if statements prevent the socket from connecting until the user has a valid role,
-        //and if they are a student, they must have a name and sessionId.
 
         socketRef.current = io(SOCKET_URL);
         const socket = socketRef.current;
@@ -52,12 +47,18 @@ export const useSocket = () => {
 
         socket.on('error', (err: { message: string }) => {
             setError(err.message);
+            toast.error(err.message);
             // Auto clear error
             setTimeout(() => setError(null), 3000);
         });
 
+        socket.on('connect_error', () => {
+            toast.error('Connection failed! Trying to reconnect...', { id: 'conn_error' });
+        });
+
         socket.on('disconnect', () => {
             console.log('Disconnected from socket server');
+            toast.error('Disconnected from real-time server', { id: 'disconnect' });
         });
 
         return () => {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useSocket } from '../hooks/useSocket';
 import { usePollContext } from '../context/PollContext';
 import { usePollTimer } from '../hooks/usePollTimer';
@@ -32,8 +33,11 @@ const TeacherDashboard = () => {
         const data = await res.json();
         setPollHistory(data);
         setShowHistory(true);
+      } else {
+        toast.error('Failed to load poll history from database');
       }
     } catch (e) {
+      toast.error('Network error loading poll history');
       console.error('Failed to fetch history', e);
     }
   };
