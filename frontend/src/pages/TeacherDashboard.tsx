@@ -8,13 +8,13 @@ const TeacherDashboard = () => {
   const { poll, students, error, role, setRole } = usePollContext();
   const timeLeft = usePollTimer();
   
-    // Restore role on reload
+  // Restore role on reload
   useEffect(() => {
     if (role !== 'teacher') {
       setRole('teacher');
     }
   }, [role, setRole]);
-
+  
   const [question, setQuestion] = useState('');
   const [duration, setDuration] = useState(60);
   const [options, setOptions] = useState([
@@ -23,6 +23,7 @@ const TeacherDashboard = () => {
   ]);
   const [showHistory, setShowHistory] = useState(false);
   const [pollHistory, setPollHistory] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'chat' | 'participants'>('chat');
 
   const fetchHistory = async () => {
     try {
@@ -70,6 +71,12 @@ const TeacherDashboard = () => {
 
   const canAskNewQuestion = !poll || poll.status === 'closed' || timeLeft === 0;
 
+  const handleKickStudent = (studentSessionId: string) => {
+    if (window.confirm("Are you sure you want to kick this student?")) {
+      socket?.emit('kick_student', { sessionId: studentSessionId });
+    }
+  };
+
   if (poll && poll.status === 'active' && !showHistory) {
     return (
       <div className="min-h-screen bg-[#F2F2F2] p-8">
@@ -84,7 +91,7 @@ const TeacherDashboard = () => {
             ◉ View Poll History
           </button>
         </div>
-        
+
         {/* Active Poll View */}
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
           
@@ -146,30 +153,57 @@ const TeacherDashboard = () => {
           {/* Sidebar */}
           <div className="bg-white rounded-xl shadow flex flex-col overflow-hidden h-full">
             <div className="flex border-b">
-              <button className="flex-1 py-3 px-4 text-center font-medium border-b-2 border-[#7755DA] text-[#7755DA]">
+              <button 
+                onClick={() => setActiveTab('chat')}
+                className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'chat' ? 'border-b-2 border-[#7755DA] text-[#7755DA]' : 'text-gray-500 hover:text-gray-700'}`}
+              >
                 Chat
               </button>
-              <button className="flex-1 py-3 px-4 text-center font-medium text-gray-500 hover:text-gray-700">
+              <button 
+                onClick={() => setActiveTab('participants')}
+                className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'participants' ? 'border-b-2 border-[#7755DA] text-[#7755DA]' : 'text-gray-500 hover:text-gray-700'}`}
+              >
                 Participants
               </button>
             </div>
             <div className="p-4 flex-1 overflow-y-auto">
-              {/* Chat implementation placeholder */}
-              <div className="flex flex-col gap-2 h-full">
-                <div className="text-xs text-gray-400 text-center mb-2">Live Chat</div>
-                <div className="bg-[#F2F2F2] p-2 rounded-lg text-sm max-w-[80%] self-start">
-                  <span className="font-bold text-xs text-gray-500 block">System</span>
-                  Welcome to the live chat!
+              {activeTab === 'chat' ? (
+                <div className="flex flex-col gap-2 h-full">
+                  <div className="text-xs text-gray-400 text-center mb-2">Live Chat</div>
+                  <div className="bg-[#F2F2F2] p-2 rounded-lg text-sm max-w-[80%] self-start">
+                    <span className="font-bold text-xs text-gray-500 block">System</span>
+                    Welcome to the live chat!
+                  </div>
                 </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {students.length === 0 ? (
+                    <div className="text-center text-gray-400 text-sm mt-4">No participants yet</div>
+                  ) : (
+                    students.map(student => (
+                      <div key={student.sessionId} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg group">
+                        <span className="text-sm font-medium text-[#373737]">{student.name}</span>
+                        <button 
+                          onClick={() => handleKickStudent(student.sessionId)}
+                          className="text-xs text-[#7755DA] font-semibold hover:underline"
+                        >
+                          Kick out
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+            {activeTab === 'chat' && (
+              <div className="p-4 border-t">
+                <input 
+                  type="text" 
+                  placeholder="Message here..." 
+                  className="w-full bg-[#F2F2F2] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#7755DA]" 
+                />
               </div>
-            </div>
-            <div className="p-4 border-t">
-              <input 
-                type="text" 
-                placeholder="Message here..." 
-                className="w-full bg-[#F2F2F2] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#7755DA]" 
-              />
-            </div>
+            )}
           </div>
 
         </div>
