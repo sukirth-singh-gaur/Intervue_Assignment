@@ -24,7 +24,7 @@ const TeacherDashboard = () => {
   ]);
   const [showHistory, setShowHistory] = useState(false);
   const [pollHistory, setPollHistory] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'chat' | 'participants'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'participants'>('participants');
 
   const fetchHistory = async () => {
     try {
@@ -157,12 +157,6 @@ const TeacherDashboard = () => {
           {/* Sidebar */}
           <div className="bg-white rounded-xl shadow flex flex-col overflow-hidden h-full">
             <div className="flex border-b">
-              <button 
-                onClick={() => setActiveTab('chat')}
-                className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'chat' ? 'border-b-2 border-[#7755DA] text-[#7755DA]' : 'text-gray-500 hover:text-gray-700'}`}
-              >
-                Chat
-              </button>
               <button 
                 onClick={() => setActiveTab('participants')}
                 className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'participants' ? 'border-b-2 border-[#7755DA] text-[#7755DA]' : 'text-gray-500 hover:text-gray-700'}`}
