@@ -81,6 +81,57 @@ const TeacherDashboard = () => {
     }
   };
 
+  const renderSidebar = () => (
+    <div className="bg-white rounded-xl shadow flex flex-col overflow-hidden h-full">
+      <div className="flex border-b">
+        <button 
+          onClick={() => setActiveTab('participants')}
+          className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'participants' ? 'border-b-2 border-[#7755DA] text-[#7755DA]' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          Participants
+        </button>
+      </div>
+      <div className="p-4 flex-1 overflow-y-auto">
+        {activeTab === 'chat' ? (
+          <div className="flex flex-col gap-2 h-full">
+            <div className="text-xs text-gray-400 text-center mb-2">Live Chat</div>
+            <div className="bg-[#F2F2F2] p-2 rounded-lg text-sm max-w-[80%] self-start">
+              <span className="font-bold text-xs text-gray-500 block">System</span>
+              Welcome to the live chat!
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {students.length === 0 ? (
+              <div className="text-center text-gray-400 text-sm mt-4">No participants yet</div>
+            ) : (
+              students.map(student => (
+                <div key={student.sessionId} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg group">
+                  <span className="text-sm font-medium text-[#373737]">{student.name}</span>
+                  <button 
+                    onClick={() => handleKickStudent(student.sessionId)}
+                    className="text-xs text-[#7755DA] font-semibold hover:underline"
+                  >
+                    Kick out
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+      {activeTab === 'chat' && (
+        <div className="p-4 border-t">
+          <input 
+            type="text" 
+            placeholder="Message here..." 
+            className="w-full bg-[#F2F2F2] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#7755DA]" 
+          />
+        </div>
+      )}
+    </div>
+  );
+
   if (poll && poll.status === 'active' && !showHistory) {
     return (
       <div className="min-h-screen bg-[#F2F2F2] p-8">
@@ -155,55 +206,7 @@ const TeacherDashboard = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="bg-white rounded-xl shadow flex flex-col overflow-hidden h-full">
-            <div className="flex border-b">
-              <button 
-                onClick={() => setActiveTab('participants')}
-                className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'participants' ? 'border-b-2 border-[#7755DA] text-[#7755DA]' : 'text-gray-500 hover:text-gray-700'}`}
-              >
-                Participants
-              </button>
-            </div>
-            <div className="p-4 flex-1 overflow-y-auto">
-              {activeTab === 'chat' ? (
-                <div className="flex flex-col gap-2 h-full">
-                  <div className="text-xs text-gray-400 text-center mb-2">Live Chat</div>
-                  <div className="bg-[#F2F2F2] p-2 rounded-lg text-sm max-w-[80%] self-start">
-                    <span className="font-bold text-xs text-gray-500 block">System</span>
-                    Welcome to the live chat!
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {students.length === 0 ? (
-                    <div className="text-center text-gray-400 text-sm mt-4">No participants yet</div>
-                  ) : (
-                    students.map(student => (
-                      <div key={student.sessionId} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg group">
-                        <span className="text-sm font-medium text-[#373737]">{student.name}</span>
-                        <button 
-                          onClick={() => handleKickStudent(student.sessionId)}
-                          className="text-xs text-[#7755DA] font-semibold hover:underline"
-                        >
-                          Kick out
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-            {activeTab === 'chat' && (
-              <div className="p-4 border-t">
-                <input 
-                  type="text" 
-                  placeholder="Message here..." 
-                  className="w-full bg-[#F2F2F2] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#7755DA]" 
-                />
-              </div>
-            )}
-          </div>
-
+          {renderSidebar()}
         </div>
       </div>
     );
@@ -272,26 +275,27 @@ const TeacherDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2F2F2] p-8 flex justify-center">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-3xl p-8 relative">
-            <div className="absolute top-8 right-8 text-red-500 text-sm">{error}</div>
-
-        <div className="flex justify-between items-center mb-6">
-          <div className="bg-[#7755DA] text-white px-3 py-1 rounded-full text-xs font-semibold inline-block">
-            Intervue Poll
-          </div>
-          <button 
-            onClick={fetchHistory}
-            className="text-sm font-semibold text-white bg-[#7755DA] py-1.5 px-4 rounded-full hover:bg-[#5757D0] transition-colors"
-          >
-            ◉ View Poll History
-          </button>
+    <div className="min-h-screen bg-[#F2F2F2] p-8">
+      <div className="max-w-5xl mx-auto mb-6 flex justify-between items-center">
+        <div className="bg-[#7755DA] text-white px-3 py-1 rounded-full text-xs font-semibold inline-block">
+          Intervue Poll
         </div>
+        <button 
+          onClick={fetchHistory}
+          className="text-sm font-semibold text-white bg-[#7755DA] py-1.5 px-4 rounded-full hover:bg-[#5757D0] transition-colors"
+        >
+          ◉ View Poll History
+        </button>
+      </div>
 
-        <h1 className="text-2xl font-bold text-[#373737] mb-2">Let's Get Started</h1>
-        <p className="text-[#6E6E6E] text-sm mb-8">
-          You'll have the ability to create and manage polls, ask questions, and monitor your students' responses in real-time.
-        </p>
+      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-8 relative">
+          <div className="absolute top-8 right-8 text-red-500 text-sm">{error}</div>
+
+          <h1 className="text-2xl font-bold text-[#373737] mb-2">Let's Get Started</h1>
+          <p className="text-[#6E6E6E] text-sm mb-8">
+            You'll have the ability to create and manage polls, ask questions, and monitor your students' responses in real-time.
+          </p>
 
         <div className="space-y-6">
           <div>
@@ -387,6 +391,10 @@ const TeacherDashboard = () => {
             Ask Question
           </button>
         </div>
+        </div>
+        
+        {/* Sidebar */}
+        {renderSidebar()}
       </div>
     </div>
   );
